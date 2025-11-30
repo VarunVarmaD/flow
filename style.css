@@ -1,0 +1,240 @@
+/* ---------- Base ---------- */
+
+:root {
+    --bg-color: #F2F2F7;
+    --card-bg: #FFFFFF;
+    --text-primary: #1C1C1E;
+    --text-secondary: #8E8E93;
+    --accent-color: #007AFF;
+    --border-color: #E5E5EA;
+    --danger-color: #FF3B30;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="dark"] {
+    --bg-color: #000000;
+    --card-bg: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #8E8E93;
+    --border-color: #38383A;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Card container ---------- */
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    margin: 60px 20px;
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+}
+
+/* Title */
+
+.container h1 {
+    margin: 0 0 32px;
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Theme Toggle */
+
+#theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+#theme-toggle:hover {
+    transform: scale(1.05);
+    background: var(--bg-color);
+}
+
+/* ---------- Input + button row ---------- */
+
+#form-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+/* Text input */
+
+#todo-input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    background: var(--bg-color);
+    color: var(--text-primary);
+    outline: none;
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#todo-input::placeholder {
+    color: var(--text-secondary);
+}
+
+#todo-input:focus {
+    background: var(--bg-color);
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* Add button */
+
+#add-button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 14px;
+    background: var(--accent-color);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+}
+
+#add-button:hover {
+    opacity: 0.9;
+    transform: scale(0.98);
+}
+
+/* ---------- List layout ---------- */
+
+#todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#todo-list li {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: opacity 0.2s ease;
+}
+
+#todo-list li:last-child {
+    border-bottom: none;
+}
+
+/* Checkbox + text + delete layout */
+
+#todo-list li input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    margin-right: 16px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #C7C7CC;
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    transition: all 0.2s ease;
+}
+
+#todo-list li input[type="checkbox"]::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: 0.2s transform ease-in-out;
+    background-color: #fff;
+}
+
+#todo-list li input[type="checkbox"]:checked {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+#todo-list li input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+#todo-list li span {
+    flex: 1;
+    margin: 0 8px;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    font-weight: 400;
+    transition: color 0.2s ease;
+}
+
+/* Completed state */
+
+#todo-list li.completed span {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+/* ---------- Delete button ---------- */
+
+#todo-list li .delete-btn {
+    cursor: pointer;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+    opacity: 0;
+    /* Hidden by default */
+}
+
+#todo-list li:hover .delete-btn {
+    opacity: 1;
+}
+
+#todo-list li .delete-btn:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--danger-color);
+}
+
+/* ---------- Counter text ---------- */
+
+#taskCounter {
+    margin-top: 32px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 500;
+}
