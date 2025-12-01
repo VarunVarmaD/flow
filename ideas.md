@@ -1,25 +1,21 @@
-# Project Ideas & Roadmap
+# roadmap
 
-This document outlines potential improvements for Flow. Contributions are welcome.
+stuff to do to make flow better.
 
-## Quick Wins
+## quick wins
+* wrap input in a `<form>` so enter key works better
+* use `Date.now()` for unique ids instead of just numbers
+* add aria-labels to delete buttons for accessibility
 
-*   **Use a `<form>` element**: Wrap the input and button in a form to handle "Enter" key submission automatically and improve accessibility.
-*   **Better ID Generation**: Replace the current incrementing ID logic with `Date.now()` or `crypto.randomUUID()` for unique IDs.
-*   **Accessible Delete Buttons**: Add `aria-label` attributes to delete buttons for better screen reader support.
+## new features
+* **edit tasks**: double click to fix typos
+* **priorities**: add high/medium/low tags with colors
+* **clear done**: button to delete everything in the done column at once
+* **animations**: make cards slide smoothly when moving
 
-## New Features
+## ui/ux
+* **empty state**: show a cool icon when there are no tasks
+* **undo**: toast notification to undo if i accidentally delete something
 
-*   **Edit Tasks**: Allow users to double-click a task to edit the text.
-*   **Clear Completed Button**: Add a button to remove all completed tasks at once.
-*   **Filter Tabs**: Implement tabs to filter tasks by "All", "Active", and "Completed".
-
-## UI/UX Improvements
-
-*   **Empty State**: Replace the "No tasks added" text with a visual illustration or icon.
-*   **Undo Notification**: Implement a toast notification with an undo option when a task is deleted.
-
-## Project Structure
-
-*   **Separate Storage Logic**: Refactor `localStorage` logic from `app.js` into a separate module or function.
-
+## code stuff
+* separate the localstorage saving logic into its own file

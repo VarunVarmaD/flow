@@ -1,8 +1,12 @@
 let btn = document.querySelector("button#add-button");
-let ul = document.querySelector("ul");
 let input = document.querySelector("input");
 let taskCounter = document.querySelector("#taskCounter");
 let themeToggle = document.querySelector("#theme-toggle");
+
+// Select the three columns
+const todoList = document.getElementById("todo-list");
+const inprogressList = document.getElementById("inprogress-list");
+const doneList = document.getElementById("done-list");
 
 // Icons
 const sunIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
@@ -32,6 +36,14 @@ themeToggle.addEventListener("click", () => {
 
 // Load tasks from localStorage
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+// MIGRATION: Ensure all tasks have a status. Default to 'todo' if missing.
+tasks = tasks.map(task => {
+    if (!task.status) {
+        return { ...task, status: 'todo' };
+    }
+    return task;
+});
+
 let nextId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
 
 const saveTasks = () => {
@@ -40,7 +52,8 @@ const saveTasks = () => {
 };
 
 const updateCounter = () => {
-    let counter = tasks.filter(task => !task.completed).length;
+    // Count tasks that are NOT in the 'done' column
+    let counter = tasks.filter(task => task.status !== 'done').length;
     if (tasks.length === 0) {
         taskCounter.innerText = "No tasks added";
     } else if (counter === 0) {
@@ -53,13 +66,31 @@ const updateCounter = () => {
 const createDOMElement = (task) => {
     let item = document.createElement("li");
     item.setAttribute("data-id", task.id);
-    if (task.completed) {
+    item.setAttribute("draggable", "true"); // Enable dragging
+
+    // Add class for styling if completed (optional, mostly handled by column now)
+    if (task.status === 'done') {
         item.classList.add("completed");
     }
 
     let checkBox = document.createElement("input");
     checkBox.type = "checkbox";
-    checkBox.checked = task.completed;
+    checkBox.checked = task.status === 'done';
+
+    // Checkbox behavior: Move to Done or back to Todo
+    checkBox.addEventListener("change", (e) => {
+        if (e.target.checked) {
+            task.status = 'done';
+            item.classList.add("completed");
+            doneList.appendChild(item);
+        } else {
+            task.status = 'todo';
+            item.classList.remove("completed");
+            todoList.appendChild(item);
+        }
+        saveTasks();
+    });
+
     item.appendChild(checkBox);
 
     let taskText = document.createElement("span");
@@ -69,10 +100,57 @@ const createDOMElement = (task) => {
     let delBtn = document.createElement("button");
     delBtn.innerText = "Delete";
     delBtn.classList.add("delete-btn");
+    delBtn.addEventListener("click", () => {
+        tasks = tasks.filter(t => t.id !== task.id);
+        item.remove();
+        saveTasks();
+    });
     item.appendChild(delBtn);
 
-    ul.appendChild(item);
+    // DRAG EVENTS
+    item.addEventListener("dragstart", () => {
+        item.classList.add("dragging");
+    });
+
+    item.addEventListener("dragend", () => {
+        item.classList.remove("dragging");
+
+        // Update data model based on new parent
+        const parentId = item.parentElement.id;
+        if (parentId === "todo-list") task.status = 'todo';
+        else if (parentId === "inprogress-list") task.status = 'inprogress';
+        else if (parentId === "done-list") task.status = 'done';
+
+        // Update visual style for done
+        if (task.status === 'done') {
+            item.classList.add("completed");
+            checkBox.checked = true;
+        } else {
+            item.classList.remove("completed");
+            checkBox.checked = false;
+        }
+
+        saveTasks();
+    });
+
+    // Append to the correct column based on status
+    if (task.status === 'todo') todoList.appendChild(item);
+    else if (task.status === 'inprogress') inprogressList.appendChild(item);
+    else if (task.status === 'done') doneList.appendChild(item);
 };
+
+// COLUMN DRAG OVER EVENTS
+const columns = [todoList, inprogressList, doneList];
+
+columns.forEach(column => {
+    column.addEventListener("dragover", (e) => {
+        e.preventDefault(); // Necessary to allow dropping
+        const draggable = document.querySelector(".dragging");
+        if (draggable) {
+            column.appendChild(draggable);
+        }
+    });
+});
 
 const addTask = (e) => {
     if (e.key === "Enter" || e.type === "click") {
@@ -80,7 +158,7 @@ const addTask = (e) => {
             let task = {
                 id: nextId,
                 text: input.value,
-                completed: false
+                status: 'todo' // Default status
             };
             tasks.push(task);
             createDOMElement(task);
@@ -99,34 +177,3 @@ updateCounter();
 
 btn.addEventListener("click", addTask);
 input.addEventListener("keydown", addTask);
-
-ul.addEventListener("click", function (e) {
-    if (e.target.nodeName === "BUTTON") {
-        let listItem = e.target.parentElement;
-        let taskId = Number(listItem.getAttribute("data-id"));
-
-        let index = tasks.findIndex(task => task.id === taskId);
-        if (index !== -1) {
-            tasks.splice(index, 1);
-            saveTasks();
-        }
-
-        listItem.remove();
-    }
-
-    if (e.target.nodeName === "INPUT") {
-        let listItem = e.target.parentElement;
-        let taskId = Number(listItem.getAttribute("data-id"));
-
-        let task = tasks.find(t => t.id === taskId);
-        if (task) {
-            task.completed = e.target.checked;
-            if (task.completed) {
-                listItem.classList.add("completed");
-            } else {
-                listItem.classList.remove("completed");
-            }
-            saveTasks();
-        }
-    }
-});
